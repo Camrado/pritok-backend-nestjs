@@ -34,6 +34,7 @@ export class CustomerService {
   }
 
   async sendVerificationEmail(customer: Customer): Promise<Message> {
+    if (customer.is_verified) throw new BadRequestException('You\'ve already confirmed your account.');
     const code = uuidv4();
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -52,6 +53,7 @@ export class CustomerService {
   }
 
   async confirmAccount(code, customer: Customer): Promise<Message> {
+    if (customer.is_verified) throw new BadRequestException('You\'ve already confirmed your account.');
     if (code !== customer.verification_code) throw new BadRequestException('Confirmation code is not correct.');
 
     customer.verification_code = null;
