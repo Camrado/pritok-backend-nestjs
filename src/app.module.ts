@@ -10,14 +10,24 @@ import { PurchaseModule } from './purchase/purchase.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE_NAME,
-      entities: ['dist/**/*.entity.js'],
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        const isProduction = process.env.STAGE === 'prod';
+
+        return {
+          ssl: isProduction,
+          extra: {
+            ssl: isProduction ? { rejectUnauthorized: false } : null,
+          },
+          type: 'postgres',
+          host: process.env.DB_HOST,
+          port: +process.env.DB_PORT,
+          username: process.env.DB_USERNAME,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_DATABASE_NAME,
+          entities: ['dist/**/*.entity.js'],
+        };
+      },
     }),
     LoggerModule,
     CustomerModule,
